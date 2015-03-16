@@ -53,7 +53,7 @@ class FrqCount(object):
 
         for allele_record in line.split():
             try:
-                allele, count = allele_record.split(':', 2)
+                allele, count = allele_record.rsplit(':', 1)
             except ValueError:
                 logger.error('line {0}: the incorrect allele record {'
                              '1}'.format(lineno, allele_record))
