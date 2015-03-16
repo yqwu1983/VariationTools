@@ -30,13 +30,13 @@ def main():
 
     if args.samples:
         variant_statistics = SampleZygosity(args.vcf_file)
-        template = '{}\t{}\t{}\t{}\n'
+        template = '\t'.join(['{}'] * 4) + '\n'
         output.write('SAMPLE\t#HOM_REF\t#HET\t#HOM_ALT\n')
         for sample in variant_statistics.samples():
             output.write(template.format(*sample))
     else:
         variant_statistics = VariantZygosity(args.vcf_file)
-        template = '{}\t{}\t{}\t{}\t{}\t{}\n'
+        template = '\t'.join(['{}'] * 6) + '\n'
         output.write('SAMPLE\tCHROM\tPOS\t#HOM_REF\t#HET\t#HOM_ALT\n')
         for variant in variant_statistics.variants():
                 output.write(template.format(*variant))
