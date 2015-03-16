@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# Copyright (C) 2015 by Gaik Tamazian
+# gaik (dot) tamazian (at) gmail (dot) com
+
+import argparse
+import cStringIO
+import logging
+from vcftools.stats import AlleleComparator
+
+logging.basicConfig()
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+
+def main():
+    """
+    This is the main function that is called when the script is
+    launched.
+    """
+    parser = argparse.ArgumentParser(
+        description='Compare allele counts in the specified vcftools '
+                    '.frq.count files.')
+
+    parser.add_argument('first', help='the first file of allele '
+                                      'counts')
+    parser.add_argument('second', help='the second file of allele '
+                                       'counts')
+    parser.add_argument('output', help='the output file name')
+
+    args = parser.parse_args()
+
+    logger.info('{0} - {1}: loading started'.format(args.first,
+                                                    args.second))
+    comparator = AlleleComparator(args.first, args.second)
+    logger.info('{0} - {1}: loading completed'.format(args.first,
+                                                      args.second))
+
+    output_buffer = cStringIO.StringIO()
+    template = '\t'.join(['{}'] * 8) + '\n'
+
+    for i in comparator.comparisons():
+        for j in i:
+            output_buffer.write(template.format(*j))
+
+    logger.info('{0} - {1}: writing started'.format(args.first,
+                                                    args.second))
+    with open(args.output, 'w') as output_file:
+        output_file.write(output_buffer.getvalue())
+    output_buffer.close()
+
+    logger.info('{0} - {1}: writing completed'.format(args.first,
+                                                      args.second))
+
+
+if __name__ == '__main__':
+    main()
