@@ -11,7 +11,6 @@ from vcftools.stats import AlleleComparator
 
 logging.basicConfig()
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
 
 
 def main():
@@ -29,7 +28,14 @@ def main():
                                        'counts')
     parser.add_argument('output', help='the output file name')
 
+    parser.add_argument('--debug', action='store_true',
+                        help='enable the debug mode (diasnostic '
+                             'messages are printed)')
+
     args = parser.parse_args()
+
+    if args.debug:
+        logger.setLevel(logging.INFO)
 
     logger.info('{0} - {1}: loading started'.format(args.first,
                                                     args.second))
