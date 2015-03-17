@@ -5,7 +5,6 @@
 # gaik (dot) tamazian (at) gmail (dot) com
 
 import argparse
-import cStringIO
 import logging
 from vcftools.stats import AlleleComparator
 
@@ -43,18 +42,15 @@ def main():
     logger.info('{0} - {1}: loading completed'.format(args.first,
                                                       args.second))
 
-    output_buffer = cStringIO.StringIO()
     template = '\t'.join(['{}'] * 8) + '\n'
-
-    for i in comparator.comparisons():
-        for j in i:
-            output_buffer.write(template.format(*j))
 
     logger.info('{0} - {1}: writing started'.format(args.first,
                                                     args.second))
+
     with open(args.output, 'w') as output_file:
-        output_file.write(output_buffer.getvalue())
-    output_buffer.close()
+        for i in comparator.comparisons():
+            for j in i:
+                output_file.write(template.format(*j))
 
     logger.info('{0} - {1}: writing completed'.format(args.first,
                                                       args.second))
