@@ -23,6 +23,34 @@ parse.command.line.args <- function() {
   args <- parser$parse_args()
 }
 
+check.input.df <- function(df) {
+  # Check if the format of the specified data frame is suitable for output of
+  # compare_allele_counts.py script.
+  #
+  # Arguments:
+  #   df: a data frame that is supposed to be read from an output file of
+  #     compare_allele_counts.py script
+  #
+  # Returns:
+  #   A logical value indicating whether the specified data frame has the
+  #   appropiate format.
+  
+  # check the number of columns
+  if (length(df) != 8) {
+    return(FALSE)
+  }
+  
+  # check column formats
+  numeric.columns <- c(2, 5:8)
+  for (i in numeric.columns) {
+    if (!is.numeric(df[[i]])) {
+      return(FALSE)
+    }
+  }
+  
+  return(TRUE)
+}
+
 add.fisher.pvalues <- function(df) {
   # Given a data frame from a file produced by compare_allele_counts.py script,
   # add a column of p-values for Fisher's exact test.
@@ -53,6 +81,9 @@ add.fisher.pvalues <- function(df) {
 
 args <- parse.command.line.args()
 df <- read.table(args$input, as.is=TRUE)
+if (!check.input.df(df)) {
+  stop('an incorrect input file')
+}
 df$P.VALUE <- add.fisher.pvalues(df)
 write.table(df, args$out, col.names=FALSE, row.names=FALSE, quote=FALSE,
             sep='\t')
