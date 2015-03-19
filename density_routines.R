@@ -30,6 +30,9 @@ get.windows <- function(regions, window.len,
     pb <- txtProgressBar(min=0, max=length(regions), style=3)
   }
   
+  # remove the regions which length is less than the window size
+  regions <- regions[width(regions) >= window.len]
+  
   # We create vectors of sequence names, start and end positions for the given
   # ranges to accelerate the loop below.
   region.seq.names <- seqnames(regions)
@@ -55,4 +58,24 @@ get.windows <- function(regions, window.len,
   }
   
   return(result)
+}
+
+get.feature.counts <- function(regions, features) {
+  # Given two GRanges objects of genomic regions and features, return the 
+  # GRanges object containing the additional column of feature counts within
+  # the regions.
+  #
+  # Arguments:
+  #   regions: a GRanges object of regions in a genome
+  #   features: a GRanges object of genome features
+  #
+  # Returns:
+  #   The GRanges object of genome regions with the column of feature counts
+  #   within them.
+  
+  counts <- countOverlaps(regions, features, type="within")
+  
+  mcols(regions) <- data.frame(feature.counts=counts)
+  
+  return(regions)
 }
