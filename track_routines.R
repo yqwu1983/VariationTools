@@ -5,7 +5,7 @@
 
 suppressPackageStartupMessages(library(GenomicRanges))
 
-read.sequence.len <- function(file) {
+read.seq.length <- function(file) {
   # Read lengths of sequences from the specified file and return them as a data
   # frame of two columns: sequence names and their lengths in base pairs.
   #
@@ -71,7 +71,7 @@ read.bed <- function(file, only.loci=FALSE, sequence.len.file=NULL) {
   
   track.seqinfo <- NULL
   if (!is.null(sequence.len.file)) {
-    seq.len <- read.sequence.len(sequence.len.file)
+    seq.len <- read.seq.length(sequence.len.file)
     track.seqinfo <- Seqinfo(seq.len$NAME, seqlengths=seq.len$LENGTH)
   } else {
     warning('a sequence length file is not specified')
@@ -96,5 +96,32 @@ read.bed <- function(file, only.loci=FALSE, sequence.len.file=NULL) {
     mcols(result) <- track[, 4:length(track)]
   }
   
+  return(result)
+}
+
+ranges.from.seq.length <- function(seq.length) {
+  # Given a data frame of sequence lengths, construct a GRanges object from it.
+  #
+  # Arguments:
+  #   seq.length: a data frame of sequence lengths containing two columns -
+  #     sequence names and their lengths
+  #
+  # Returns:
+  #   The GRanges object representing the sequences which lengths are given in
+  #   the specified data frame.
+  
+  if (length(seq.length) != 2) {
+    stop('the sequence length data frame must contain two columns')
+  }
+  names(seq.length) <- c('NAME', 'LENGTH')
+  if (!is.numeric(seq.length$LENGTH)) {
+    stop('sequence length values must be numeric')
+  }
+  
+  result <- GRanges(seqnames=seq.length$NAME,
+                    ranges=IRanges(start=rep(1, length(seq.length$LENGTH)),
+                                   end=seq.length$LENGTH),
+                    seqinfo=Seqinfo(seqnames=seq.length$NAME,
+                                    seqlengths=seq.length$LENGTH))
   return(result)
 }
