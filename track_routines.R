@@ -180,7 +180,11 @@ read.gtf <- function(file, only.loci=FALSE, sequence.len.file=NULL) {
       warning(paste('sequences missing in the file of lengths to be excluded:',
               paste(unique(track$SEQUENCE[!(track$SEQUENCE %in% seq.len$NAME)]),
                     collapse=',')))
-      track <- subset(track, SEQUENCE %in% seq.len$NAME)
+      mask <- track$SEQUENCE %in% seq.len$NAME
+      track <- track[mask, ]
+      for (i in 1:length(group.list)) {
+        group.list[[i]] <- group.list[[i]][mask]
+      }
     }
   } else {
     warning('a sequence length file is not specified')
