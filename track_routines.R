@@ -125,3 +125,65 @@ ranges.from.seq.length <- function(seq.length) {
                                     seqlengths=seq.length$LENGTH))
   return(result)
 }
+
+read.gtf <- function(file, only.loci=FALSE, sequence.len.file=NULL) {
+  # Read contents of a GTF track file and return the GRanges object
+  # representing them.
+  #
+  # Args:
+  #   file: a name of a file in the GTF format
+  #   only.loci: get only positions of features in a genome without any
+  #     additional information
+  #   sequence.len.file: a name of a file containing lengths of genome
+  #     sequences of the track
+  #
+  # Note:
+  #   The name of a sequence length file is an optinal argument. However, it is
+  #   recommended to use it if possible to ensure that regions in a track file
+  #   are correct.
+  
+  gtf.names <- c('SEQUENCE',
+                 'SOURCE',
+                 'FEATURE',
+                 'START',
+                 'END',
+                 'SCORE',
+                 'STRAND',
+                 'FRAME',
+                 'ATTRIBUTES')
+  
+  track <- read.table(file, as.is=TRUE, sep='\t')
+  names(track) <- gtf.names
+  
+  # extract gene and transcript ids
+  group <- do.call(rbind, strsplit(track$ATTRIBUTES, ';'))
+  group <- gsub('^\\s+', '', group)
+  group.list <- list()
+  # iterate through each column of the obtained matrix
+  for (i in 1:ncol(group)) {
+    # check if the current column is empty
+    if (!all(group[, i] == '')) {
+      temp <- do.call(rbind, strsplit(group[, i], ' '))
+      column.header <- unique(temp[, 1])
+      if (length(column.header) > 1) {
+        stop(paste('multiple tags in the', i, 'GTF attributes column'))
+      }
+      group.list[[column.header]] <- temp[, 2]
+    } 
+  }
+  
+  track.seqinfo <- NULL
+  if (!is.null(sequence.len.file)) {
+    seq.len <- read.seq.length(sequence.len.file)
+    track.seqinfo <- Seqinfo(seq.len$NAME, seqlengths=seq.len$LENGTH)
+  } else {
+    warning('a sequence length file is not specified')
+  }
+  
+  result <- GRanges(seqnames=track$SEQUENCE,
+                    ranges=IRanges(start=track$START,
+                                   end=track$END),
+                    strand=track$STRAND,
+                    group.list,
+                    seqinfo=track.seqinfo)
+}
