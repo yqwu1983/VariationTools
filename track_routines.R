@@ -176,6 +176,12 @@ read.gtf <- function(file, only.loci=FALSE, sequence.len.file=NULL) {
   if (!is.null(sequence.len.file)) {
     seq.len <- read.seq.length(sequence.len.file)
     track.seqinfo <- Seqinfo(seq.len$NAME, seqlengths=seq.len$LENGTH)
+    if (any(!(track$SEQUENCE %in% seq.len$NAME))) {
+      warning(paste('sequences missing in the file of lengths to be excluded:',
+              paste(unique(track$SEQUENCE[!(track$SEQUENCE %in% seq.len$NAME)]),
+                    collapse=',')))
+      track <- subset(track, SEQUENCE %in% seq.len$NAME)
+    }
   } else {
     warning('a sequence length file is not specified')
   }
