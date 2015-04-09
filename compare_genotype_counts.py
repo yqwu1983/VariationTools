@@ -117,29 +117,40 @@ def main():
             samples.append(line.rstrip())
 
     comparator = MultiVCFReader(args.compare) if args.compare else None
-    template = '\t'.join(['{}'] * 5) + '\n'
-    template_compared = '\t'.join(['{}'] * 8) + '\n'
+    template = '\t'.join(['{}'] * 8) + '\n'
+    template_compared = '\t'.join(['{}'] * 11) + '\n'
 
     with open(args.output, 'w') as output_file:
         for variant in vcf.Reader(open(args.vcf_file)):
             genotype_counts = count_genotypes(variant)
+            variant_type = 'SNV' if variant.is_snp else 'INDEL'
+            variant_len = max(len(variant.REF),
+                              reduce(max, map(len, variant.ALT)))
             if comparator:
                 compared_variant = comparator.get_variant(
                     variant.CHROM, variant.POS)
                 if compared_variant:
                     compared_genotype_counts = count_genotypes(
                         compared_variant, samples)
+                    compared_aaf = compared_variant.aaf
                 else:
                     # the variant is not present in the specified VCF
                     # files
                     compared_genotype_counts = GenotypeCounts(
                         *(['NA'] * 3))
+                    compared_aaf = ['NA']
                 output_file.write(template_compared.format(
                     variant.CHROM, variant.POS,
+                    variant.aaf[0],
+                    compared_aaf[0],
+                    variant_type, variant_len,
                     *genotype_counts + compared_genotype_counts))
             else:
                 output_file.write(template.format(
-                    variant.CHROM, variant.POS, *genotype_counts))
+                    variant.CHROM, variant.POS,
+                    variant.aaf[0],
+                    variant_type, variant_len,
+                    *genotype_counts))
 
 
 if __name__ == '__main__':
