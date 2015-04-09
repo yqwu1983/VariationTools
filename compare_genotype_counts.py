@@ -118,7 +118,7 @@ def main():
 
     comparator = MultiVCFReader(args.compare) if args.compare else None
     template = '\t'.join(['{}'] * 8) + '\n'
-    template_compared = '\t'.join(['{}'] * 11) + '\n'
+    template_compared = '\t'.join(['{}'] * 12) + '\n'
 
     with open(args.output, 'w') as output_file:
         for variant in vcf.Reader(open(args.vcf_file)):
