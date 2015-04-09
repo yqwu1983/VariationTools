@@ -132,23 +132,26 @@ def main():
                 if compared_variant:
                     compared_genotype_counts = count_genotypes(
                         compared_variant, samples)
-                    compared_aaf = compared_variant.aaf
+                    compared_aaf = \
+                        (compared_genotype_counts.alt_het_hom * 2 +
+                         compared_genotype_counts.ref_alt_het) / \
+                        float(sum(compared_genotype_counts))
                 else:
                     # the variant is not present in the specified VCF
                     # files
                     compared_genotype_counts = GenotypeCounts(
                         *(['NA'] * 3))
-                    compared_aaf = ['NA']
+                    compared_aaf = 'NA'
                 output_file.write(template_compared.format(
                     variant.CHROM, variant.POS,
                     variant.aaf[0],
-                    compared_aaf[0],
+                    compared_aaf,
                     variant_type, variant_len,
                     *genotype_counts + compared_genotype_counts))
             else:
                 output_file.write(template.format(
                     variant.CHROM, variant.POS,
-                    variant.aaf[0],
+                    variant.aaf,
                     variant_type, variant_len,
                     *genotype_counts))
 
