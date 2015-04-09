@@ -135,7 +135,7 @@ def main():
                     compared_aaf = \
                         (compared_genotype_counts.alt_het_hom * 2 +
                          compared_genotype_counts.ref_alt_het) / \
-                        float(sum(compared_genotype_counts))
+                        float(sum(compared_genotype_counts)*2)
                 else:
                     # the variant is not present in the specified VCF
                     # files
